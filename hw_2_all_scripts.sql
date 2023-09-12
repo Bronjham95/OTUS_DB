@@ -1,27 +1,28 @@
 /* ==================================================== */
-
 /* Таблица Покупатели: */
+/* ==================================================== */
+
 create table CON_CONSUMER(
-customer_id INTEGER not null,
-first_name  VARCHAR(100 CHAR) not null,
-last_name   VARCHAR(100 CHAR) not null,
-second_name VARCHAR(100 CHAR), -- может отсутствовать: например, иностранный гражданин
-display     VARCHAR(300 CHAR) not null,
-birth_date  DATE not null,
-phone       VARCHAR(35  CHAR) not null,
-email       VARCHAR(100 CHAR) not null,
-city        VARCHAR(100 CHAR) not null 
+customer_id INTEGER 	 not null,
+first_name  VARCHAR(100) not null,
+last_name   VARCHAR(100) not null,
+second_name VARCHAR(100), -- может отсутствовать: например, иностранный гражданин
+display     VARCHAR(300) not null,
+birth_date  DATE 		 not null,
+phone       VARCHAR(35)  not null,
+email       VARCHAR(100) not null,
+city        VARCHAR(100) not null 
 );
 
 -- Первичный ключ(PK)
 alter table CON_CONSUMER
 add constraint PK_CON_CONSUMER primary key (CUSTOMER_ID);
 
--- Уникальный индекс по номеру телефона: (телефон не должен повторяться)
+-- Уникальное ограничение по номеру телефона: (телефон не должен повторяться)
 ALTER TABLE CON_CONSUMER
 ADD CONSTRAINT U_PHONE UNIQUE (phone);
 
--- Уникальный индекс по электронной почте: (электронный ящик не должен повторяться)
+-- Уникальное ограничение по электронной почте: (электронный ящик не должен повторяться)
 ALTER TABLE CON_CONSUMER
 ADD CONSTRAINT U_EMAIL UNIQUE (email);
 
@@ -59,8 +60,13 @@ constraint CHECK_CON_CONSUMER_CITY
 check(REGEXP_SUBSTR (REGEXP_REPLACE (CITY,'^([a-zA-Z\u0080-\u024F]+(?:. |-| |))*[a-zA-Z\u0080-\u024F]*$')));
 /* ==================================================== */
 
+
+
+
+
 /* ==================================================== */
 /* Таблица Покупки: */
+/* ==================================================== */
 create table CON_TRANSACTION(
 order_id     INTEGER,
 customer_id  INTEGER,
@@ -75,29 +81,29 @@ add constraint PK_CON_TRANSACTION primary key (ORDER_ID);
 
 -- Внешний ключ(FK):
 alter table CON_TRANSACTION
-  add constraint FK_CUSTOMER_TRANS foreign key (CUSTOMER_ID)
+  add constraint FK_CON_CONSUMER foreign key (CUSTOMER_ID)
   references CON_CONSUMER (CUSTOMER_ID);
 
 -- Внешний ключ(FK):  
 alter table CON_TRANSACTION
-  add constraint FK_SHOP_TRAN foreign key (store_id)
-  references CON_SHOP (store_id);
+  add constraint FK_CON_SHOP foreign key (STORE_ID)
+  references CON_SHOP (STORE_ID);
 
 -- Индекс по FK(покупатель) + order_date(дата покупки)
 create index IDX_CON_TRANSACTION_CUS_DATE
 on CON_TRANSACTION(customer_id, trunc(order_date));
 
 -- Индекс по FK(магазин) + order_date(дата покупки)
-create index IDX_CON_TRANSACTION_DISPLAY
+create index IDX_CON_TRANSACTION_ST_ORDATE
 on CON_TRANSACTION(store_id, trunc(order_date));
 
 -- Индекс по FK(покупатель) + order_status(0/1 - не успешно/успешно)
-create index IDX_CON_TRANSACTION_DISPLAY
-on CON_TRANSACTION(customer_id, order_status);
+--create index IDX_CON_TRANSACTION_CUS_ORSTAT
+--on CON_TRANSACTION(customer_id, order_status);
 
 -- Индекс по FK(магазин) + order_status(0/1 - не успешно/успешно)
-create index IDX_CON_TRANSACTION_DISPLAY
-on CON_TRANSACTION(store_id, order_status);
+--create index IDX_CON_TRANSACTION_ST_ORSTAT
+--on CON_TRANSACTION(store_id, order_status);
 
 /* CHECK по ORDER_STATUS: статус 0 или 1 */
 alter table CON_TRANSACTION 
@@ -105,16 +111,19 @@ constraint CHECK_CON_TRAN_STATUS
 check(ORDER_STATUS 0 between 1);
 /* ==================================================== */
 
-/* ==================================================== */
 
+
+
+/* ==================================================== */
 /* Таблица Магазин: */
+/* ==================================================== */
 create table CON_SHOP(
-store_id     INTEGER not null,
-store_name   VARCHAR(150 CHAR) not null,
-phone        VARCHAR(35  CHAR) not null,
-email        VARCHAR(100 CHAR) not null,
-street       VARCHAR(100 CHAR) not null,
-city         VARCHAR(100 CHAR) not null
+store_id     INTEGER 	  not null,
+store_name   VARCHAR(150) not null,
+phone        VARCHAR(35)  not null,
+email        VARCHAR(100) not null,
+street       VARCHAR(100) not null,
+city         VARCHAR(100) not null
 );
 
 -- Первичный ключ(PK):
@@ -138,31 +147,34 @@ create index IDX_CON_TRANS_STORE_NAME
 on CON_SHOP(UPPER(STORE_NAME));
 
 -- Индекс по названию улицы: часто будет использоваться при обращении к данным.
-create index IDX_CON_TRANS_STREET
-on CON_SHOP(UPPER(STREET));
+--create index IDX_CON_TRANS_STREET
+--on CON_SHOP(UPPER(STREET));
 
 -- Индекс по названию улицы: часто будет использоваться при обращении к данным.
 create index IDX_CON_TRANS_CITY
 on CON_SHOP(UPPER(CITY));
 
--- Уникальный индекс по номеру телефона: (телефон не должен повторяться)
+-- Уникальное ограничение по номеру телефона: (телефон не должен повторяться)
 ALTER TABLE CON_SHOP
 ADD CONSTRAINT U_PHONE UNIQUE (phone);
 
--- Уникальный индекс по электронной почте: (электронный ящик не должен повторяться)
+-- Уникальное ограничение по электронной почте: (электронный ящик не должен повторяться)
 ALTER TABLE CON_SHOP
 ADD CONSTRAINT U_EMAIL UNIQUE (email);
 /* ==================================================== */
 
-/* ==================================================== */
 
+
+
+/* ==================================================== */
 /* Таблица Купленный товар: */
+/* ==================================================== */
 create table  CON_PURCHGOODS(
 order_id      INTEGER not null,
 item_id       INTEGER not null,
 product_id    INTEGER,
 quantity      INTEGER not null,
-list_price    FLOAT not null,
+list_price    FLOAT   not null,
 discount      INTEGER
 );
 
@@ -176,7 +188,7 @@ ADD CONSTRAINT U_ITEM_ID UNIQUE (ITEM_ID);
 
 -- Внешний ключ(FK):  
 alter table CON_PURCHGOODS
-  add constraint FK_SHOP_TRAN foreign key (PRODUCT_ID)
+  add constraint FK_RLZ_PRODUCT foreign key (PRODUCT_ID)
   references RLZ_PRODUCT (PRODUCT_ID);
   
 -- Индекс по FK + discount(скидка)
@@ -195,15 +207,18 @@ on CON_PURCHGOODS(PRODUCT_ID, QUANTITY);
 alter table CON_PURCHGOODS 
 constraint CHECK_CON_PURCHGOODS_QUANT 
 check(quantity >= 0);
-
 /* ======================================== */
 
+
+
+/* ======================================== */
 /* Таблица Товары: */
+/* ======================================== */
 create table RLZ_PRODUCT(
-product_id   INTEGER not null,
-product_name VARCHAR(100 CHAR) not null,
+product_id   INTEGER 	  not null,
+product_name VARCHAR(100) not null,
 category_id  INTEGER,
-list_price   FLOAT not null,
+list_price   FLOAT 		  not null,
 part_id      INTEGER
 );
 
@@ -213,7 +228,7 @@ add constraint PK_RLZ_PRODUCT primary key (PRODUCT_ID);
 
 -- FK от таблицы CON_SHOP:
 alter table RLZ_PRODUCT
-  add constraint FK_RLZ_PRODUCT_PART foreign key (part_id)
+  add constraint FK_PUR_SHIPMENT foreign key (part_id)
   references PUR_SHIPMENT (part_id);
   
 -- Функциональный индекс по названию, чтобы не было проблем с регистром:
@@ -225,9 +240,12 @@ create index IDX_RLZ_PRODUCT_PROD_LIST
 on RLZ_PRODUCT(UPPER(PRODUCT_NAME), LIST_PRICE);
 /* ======================================== */
 
-/* ======================================== */
 
+
+
+/* ======================================== */
 /* Таблица Категория товара: */
+/* ======================================== */
 create table RLZ_CATEGORY(
 category_id not null
 category_name not null
@@ -239,31 +257,34 @@ add constraint PK_RLZ_CATEGORY primary key (CATEGORY_ID);
 
 -- Индекс по названию категории, при условии: что будет их много.
 create index IDX_RLZ_CATEGORY_CATEGORY_NAME
-on RLZ_CATEGORY(CATEGORY_NAME);
+on RLZ_CATEGORY(UPPER(CATEGORY_NAME));
 /* ======================================== */
 
-/* ======================================== */
 
+
+
+/* ======================================== */
 /* Таблица Склад: */
+/* ======================================== */
 create table RLZ_WAREHOUSE(
 store_id     INTEGER not null,
 product_id   INTEGER not null,
 quantity     INTEGER not null,
-rec_date     DATE default sysdate
+rec_date     DATE 	 default sysdate
 );
 
--- Уникальный индекс по ID магазина и ID продукта, для уникальности строки
+-- Уникальное ограничение по ID магазина и ID продукта, для уникальности строки
 ALTER TABLE RLZ_WAREHOUSE
 ADD CONSTRAINT U_STORE_PRODUCT_DATE UNIQUE (STORE_ID, PRODUCT_ID, rec_date);
 
 -- FK от таблицы RLZ_PRODUCT
 alter table RLZ_WAREHOUSE
-  add constraint FK_RLZ_WAREHOUSE_STOR foreign key (store_id)
+  add constraint FK_RLZ_PRODUCT foreign key (store_id)
   references RLZ_PRODUCT (store_id);
 
 -- FK от таблицы CON_SHOP
 alter table RLZ_WAREHOUSE
-  add constraint FK_RLZ_WAREHOUSE_PROD foreign key (product_id)
+  add constraint FK_CON_SHOP foreign key (product_id)
   references CON_SHOP (product_id);
 
 -- CHECK: количество товара не может быть отрицательным
@@ -272,29 +293,35 @@ constraint CHECK_RLZ_WAREHOUSE_QUANT
 check(quantity >= 0);
 /* ======================================== */
 
-/* ======================================== */
 
+
+
+/* ======================================== */
 /* Таблица Производитель: */
-create table PUR_PRODUCER(
-producer_id   INTEGER not null, 
-producer_name VARCHAR(150 CHAR) not null
+/* ======================================== */
+create table PUR_MANUFACTURER(
+producer_id   INTEGER 	   not null, 
+producer_name VARCHAR(150) not null
 );
 
 -- Первичный ключ(PK):
-alter table PUR_PRODUCER
-add constraint PK_PUR_PRODUCER primary key (producer_id);
+alter table PUR_MANUFACTURER
+add constraint PK_PPUR_MANUFACTURER primary key (producer_id);
 
 -- Обычный индекс по названию производителя
-create index IDX_PUR_PRODUCER_PROD_NAME
+create index IDX_PUR_MANUFACTURER_PROD_NAME
 on PUR_PRODUCER(UPPER(producer_name));
 /* ======================================== */
 
-/* ======================================== */
 
+
+
+/* ======================================== */
 /* Таблица Поставщики: */
+/* ======================================== */
 create table PUR_VENDOR(
-vendor_id INTEGER not null,
-vendor_name VARCHAR(150 CHAR) not null,
+vendor_id 	INTEGER      not null,
+vendor_name VARCHAR(150) not null,
 producer_id INTEGER
 );
 
@@ -302,6 +329,11 @@ producer_id INTEGER
 alter table PUR_VENDOR
 add constraint PK_PUR_VENDOR primary key (vendor_id);
 
+-- FK от таблицы PUR_MANUFACTURER
+alter table PUR_VENDOR
+  add constraint FK_PUR_MANUFACTURER foreign key (producer_id)
+  references PUR_MANUFACTURER (producer_id);
+  
 -- Обычный индекс по названию поставщика 
 create index IDX_PUR_VENDOR_VENDOR_NAME
 on PUR_VENDOR(UPPER(vendor_name));
@@ -312,10 +344,10 @@ on PUR_VENDOR(UPPER(vendor_name));
 /* Таблица Партия товара: */
 create table PUR_SHIPMENT(
 part_id       INTEGER not null,
-part_date     DATE not null,
+part_date     DATE 	  not null,
 part_quantity INTEGER not null,
-buy_price     FLOAT not null,
-prod_sum      FLOAT not null,
+buy_price     FLOAT   not null,
+prod_sum      FLOAT   not null,
 vendor_id     INTEGER 
 );
 
@@ -323,17 +355,22 @@ vendor_id     INTEGER
 alter table PUR_SHIPMENT
 add constraint PK_PUR_SHIPMENT primary key (part_id);
 
+-- FK от таблицы PUR_SHIPMENT
+alter table PUR_SHIPMENT
+  add constraint FK_PUR_VENDOR foreign key (vendor_id)
+  references PUR_VENDOR (vendor_id);
+
 -- Составной индекс по ID поставщика и дате:
 create index IDX_PUR_SHIPMENT_VENDOR_DATE
-on PUR_SHIPMENT(vendor_id, part_date);
+on PUR_SHIPMENT(vendor_id, trunc(part_date));
 
 -- Составной индекс по ID поставщика, ID партии и дате:
 create index IDX_PUR_SHIPMENT_VENDOR_DATE
-on PUR_SHIPMENT(vendor_id, part_id, part_date);
+on PUR_SHIPMENT(vendor_id, part_id, trunc(part_date));
 
 -- Составной индекс по ID партии, кол-во коробок в партии и дате:
 create index IDX_PUR_SHIPMENT_VENDOR_DATE
-on PUR_SHIPMENT(part_id, part_quantity, part_date);
+on PUR_SHIPMENT(part_id, part_quantity, trunc(part_date));
 
 -- CHECK: Сумма закупки поставщика не может быть отрицательной
 alter table PUR_SHIPMENT 
