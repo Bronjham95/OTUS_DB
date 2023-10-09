@@ -66,15 +66,15 @@ _Дадим пользователю consumer гранты на схемы и ч
 ```sql
 -- потребители:
 GRANT USAGE ON SCHEMA consumer TO customer;
-GRANT SELECT ON ALL TABLES IN SCHEMA customer TO consumer;
+GRANT SELECT ON ALL TABLES IN SCHEMA consumer TO customer;
 
 -- реализация:
 GRANT USAGE ON SCHEMA supply   TO customer;
-GRANT SELECT ON ALL TABLES IN SCHEMA supply TO consumer;
+GRANT SELECT ON ALL TABLES IN SCHEMA supply TO customer;
 
 -- возобновление:
 GRANT USAGE ON SCHEMA purchase TO customer;
-GRANT SELECT ON ALL TABLES IN SCHEMA purchase TO consumer;
+GRANT SELECT ON ALL TABLES IN SCHEMA purchase TO customer;
 ```
 ### 4. Распределение таблиц проекта по схемам и пространствам.
 
