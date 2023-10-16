@@ -12,8 +12,8 @@ where c.phone ~ '^[+]' -- покупатели, у которых есть "+", 
 -- Обращаемся к таблице "Покупатели"
 select * from consumer.customer c
 -- Объединяем с таблицей "Транзакции(Покупки)"
-join consumer.user_transaction 
-ut on c.id = ut.customer_id
+join consumer.user_transaction ut
+on c.id = ut.customer_id
 -- Объединяем с таблицей "Магазин"
 -- "Магазин" может быть не действующий, т.е. закрыться.
 --  Т.о. можно добавить флаг, который бы означал: действующий (1) или нет (0).
